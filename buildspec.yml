@@ -3,7 +3,7 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo Connecting to Amazon ECR...
+      - echo Connecting to Amazon ECR11...
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
       - REPOSITORY_URI=916495840179.dkr.ecr.ap-southeast-1.amazonaws.com/demo
