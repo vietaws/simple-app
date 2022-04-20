@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 FROM node:16
 
 #create app directory
