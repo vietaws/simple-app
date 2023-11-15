@@ -1,32 +1,35 @@
 version: 0.2
 
 phases:
+  install:
+    # runtime-versions:
+    #   nodejs: latest
+    commands:
+      - printenv
+      # - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &
+      # - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
   pre_build:
     commands:
-      - echo Connecting to Amazon ECR...
+      - echo Log in to Amazon ECR YAML Custom...
       - aws --version
-      # - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-      - aws ecr get-login-password --region ap-southeast-1 | docker login
-        --username AWS --password-stdin
-        916495840179.dkr.ecr.ap-southeast-1.amazonaws.com
-      - REPOSITORY_URI=916495840179.dkr.ecr.ap-southeast-1.amazonaws.com/demo
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 084559577914.dkr.ecr.us-east-1.amazonaws.com
+      - REPOSITORY_URI=084559577914.dkr.ecr.us-east-1.amazonaws.com/learn-codebuild
+      # please update [AWS_ACCOUNT_ID] & [REPO_NAME] & AWS_REGION based on your setup
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
   build:
     commands:
       - echo Build started on `date`
-      - echo Building the Docker image...
-      - docker build --platform linux/amd64 -t $REPOSITORY_URI:latest .
+      - echo Building the Docker image.
+      - docker build -t $REPOSITORY_URI:latest .
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
   post_build:
     commands:
       - echo Build completed on `date`
-      - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Writing image definitions file...
-      - printf '[{"name":"simple-app","imageUri":"%s"}]'
-        $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - echo write definitions file...
+      - printf '[{"name":"user","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
       - cat imagedefinitions.json
 artifacts:
   files: imagedefinitions.json
