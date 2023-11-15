@@ -1,5 +1,4 @@
-FROM --platform=linux/amd64 node:16
-
+FROM public.ecr.aws/docker/library/node:lts-slim
 #create app directory
 WORKDIR /app
 
